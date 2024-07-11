@@ -11,17 +11,30 @@ public class User {
     private LocalDateTime updatedAt;
     private boolean isActive;
 
+    // Default constructor
     public User() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.isActive = true;
     }
 
+    // Constructor for creating a new user
     public User(String username, String email, String passwordHash) {
         this();
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
+    }
+
+    // Constructor for retrieving user from database
+    public User(Long id, String username, String email, String passwordHash, LocalDateTime createdAt, LocalDateTime updatedAt, boolean isActive) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.isActive = isActive;
     }
 
     // Getters and setters
@@ -79,15 +92,5 @@ public class User {
 
     public void setActive(boolean active) {
         isActive = active;
-    }
-
-    public void deactivate() {
-        this.isActive = false;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void activate() {
-        this.isActive = true;
-        this.updatedAt = LocalDateTime.now();
     }
 }
