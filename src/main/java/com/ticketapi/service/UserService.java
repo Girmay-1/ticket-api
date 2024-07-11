@@ -13,7 +13,7 @@ public class UserService {
 
     public User createUser(User user) {
         String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, user.getUsername(), user.getPassword(), user.getEmail());
+        jdbcTemplate.update(sql, user.getUsername(), user.getPasswordHash(), user.getEmail());
         return user;
     }
 
