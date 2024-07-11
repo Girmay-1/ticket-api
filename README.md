@@ -13,8 +13,8 @@ Ticket API is a robust, scalable backend service for managing event ticketing. T
 - CI/CD pipeline integration
 
 ## Tech Stack
-- Java 11
-- Spring Boot 2.6.3
+- Java 17
+- Spring Boot 3.1.0
 - PostgreSQL
 - Docker
 - JWT for authentication
