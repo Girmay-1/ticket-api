@@ -7,6 +7,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +18,32 @@ import java.util.function.Function;
 public class JwtUtil {
 
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static final long DEFAULT_EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
+    private Clock clock = Clock.systemUTC(); // Default to system clock
+
+    // Method to set a custom clock (for testing)
+    void setClock(Clock clock) {
+        this.clock = clock;
+    }
+    public String generateToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, username, DEFAULT_EXPIRATION);
+    }
+
+    public String generateToken(String username, long expirationMillis) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, username, expirationMillis);
+    }
+
+    private String createToken(Map<String, Object> claims, String subject, long expirationMillis) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(Date.from(Instant.now(clock)))
+                .setExpiration(Date.from(Instant.now(clock).plusMillis(expirationMillis)))
+                .signWith(key)
+                .compact();
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -35,22 +63,7 @@ public class JwtUtil {
     }
 
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(key)
-                .compact();
+        return extractExpiration(token).before(Date.from(Instant.now(clock)));
     }
 
     public Boolean validateToken(String token, String username) {
