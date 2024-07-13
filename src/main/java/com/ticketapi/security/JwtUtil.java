@@ -7,40 +7,67 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.function.Function;
 
 @Component
 public class JwtUtil {
 
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private static final long DEFAULT_EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
+    private Clock clock = Clock.systemUTC(); // Default to system clock
 
-    // Existing method, unchanged
+    // Method to set a custom clock (for testing)
+    void setClock(Clock clock) {
+        this.clock = clock;
+    }
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, username, DEFAULT_EXPIRATION);
     }
 
-    // New overloaded method for testing
     public String generateToken(String username, long expirationMillis) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, username, expirationMillis);
     }
 
-    // Modified createToken method
     private String createToken(Map<String, Object> claims, String subject, long expirationMillis) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .setIssuedAt(Date.from(Instant.now(clock)))
+                .setExpiration(Date.from(Instant.now(clock).plusMillis(expirationMillis)))
                 .signWith(key)
                 .compact();
     }
 
-    // ... rest of your existing methods ...
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
 
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(Date.from(Instant.now(clock)));
+    }
+
+    public Boolean validateToken(String token, String username) {
+        final String extractedUsername = extractUsername(token);
+        return (extractedUsername.equals(username) && !isTokenExpired(token));
+    }
 }
