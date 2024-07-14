@@ -3,6 +3,7 @@ package com.ticketapi.service;
 import com.ticketapi.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,26 +27,33 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        String sql = """
-            INSERT INTO users (username, email, password_hash, created_at, updated_at, is_active)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """;
+        String encodedPassword = passwordEncoder.encode(user.getPasswordHash());
+        // Set the encoded password back to the user object
+        user.setPasswordHash(encodedPassword);
 
+        // Insert the user into the database and retrieve the generated ID
         KeyHolder keyHolder = new GeneratedKeyHolder();
+        int rowsAffected = jdbcTemplate.update(
+                (PreparedStatementCreator) con -> {
+                    PreparedStatement ps = con.prepareStatement(
+                            "INSERT INTO users (username, email, password, created_at, updated_at, enabled) VALUES (?, ?, ?, ?, ?, ?)",
+                            new String[] {"id"});
+                    ps.setString(1, user.getUsername());
+                    ps.setString(2, user.getEmail());
+                    ps.setString(3, user.getPasswordHash());
+                    ps.setObject(4, LocalDateTime.now());
+                    ps.setObject(5, LocalDateTime.now());
+                    ps.setBoolean(6, true);
+                    return ps;
+                },
+                keyHolder);
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, user.getUsername());
-            ps.setString(2, user.getEmail());
-            ps.setString(3, passwordEncoder.encode(user.getPasswordHash())); // Encode the password
-            ps.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setBoolean(6, true);
-            return ps;
-        }, keyHolder);
-
-        user.setId(keyHolder.getKey().longValue());
-        return user;
+        if (rowsAffected > 0) {
+            user.setId(keyHolder.getKey().longValue());
+            return user;
+        } else {
+            throw new RuntimeException("Failed to create user");
+        }
     }
 
     public User getUserById(Long id) {
