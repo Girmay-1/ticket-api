@@ -1,6 +1,7 @@
 package com.ticketapi.service;
 
 import com.ticketapi.model.User;
+import com.ticketapi.util.UserQueries;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,8 +18,8 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
 
 class UserServiceTest {
 
@@ -51,14 +52,14 @@ class UserServiceTest {
 
         assertNotNull(createdUser.getId());
         assertEquals(1L, createdUser.getId());
-        verify(passwordEncoder).encode("password");
+        verify(passwordEncoder).encode(eq("password"));
         verify(jdbcTemplate).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
     }
 
     @Test
     void getUserById_ShouldReturnUser() {
         User expectedUser = new User(1L, "testuser", "test@example.com", "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), true);
-        when(jdbcTemplate.queryForObject(anyString(), any(Object[].class), any(RowMapper.class))).thenReturn(expectedUser);
+        when(jdbcTemplate.queryForObject(eq(UserQueries.GET_USER_BY_ID.getQuery()), eq(new Object[]{1L}), any(RowMapper.class))).thenReturn(expectedUser);
 
         User user = userService.getUserById(1L);
 
@@ -73,7 +74,7 @@ class UserServiceTest {
         User expectedUser = new User(1L, username, "test@example.com", "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), true);
 
         when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM users WHERE username = ?"),
+                eq(UserQueries.GET_USER_BY_USERNAME.getQuery()),
                 eq(new Object[]{username}),
                 any(RowMapper.class)
         )).thenReturn(expectedUser);
@@ -85,11 +86,9 @@ class UserServiceTest {
         assertEquals(expectedUser.getUsername(), user.getUsername());
         assertEquals(expectedUser.getEmail(), user.getEmail());
         verify(jdbcTemplate).queryForObject(
-                eq("SELECT * FROM users WHERE username = ?"),
+                eq(UserQueries.GET_USER_BY_USERNAME.getQuery()),
                 eq(new Object[]{username}),
                 any(RowMapper.class)
         );
     }
-
-
 }
