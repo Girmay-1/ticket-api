@@ -30,7 +30,7 @@ public class UserService {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int rowsAffected = jdbcTemplate.update(
-                (PreparedStatementCreator) con -> {
+                con -> {
                     PreparedStatement ps = con.prepareStatement(
                             UserQueries.CREATE_USER.getQuery(),
                             new String[] {"id"}
