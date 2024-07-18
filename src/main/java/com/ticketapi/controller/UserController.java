@@ -3,6 +3,9 @@ package com.ticketapi.controller;
 import com.ticketapi.model.User;
 import com.ticketapi.service.UserService;
 import com.ticketapi.security.JwtUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -22,6 +26,7 @@ public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     public UserController(UserService userService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
@@ -36,6 +41,7 @@ public class UserController {
             User registeredUser = userService.createUser(user);
             return ResponseEntity.ok(registeredUser);
         } catch (Exception e) {
+            logger.error("exception in trying to register user:", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
@@ -57,6 +63,7 @@ public class UserController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.error("exception in loginUser method: ", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: " + e.getMessage());
         }
     }
