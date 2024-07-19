@@ -26,18 +26,15 @@ public class JwtUtil {
         this.clock = clock;
     }
     public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username, DEFAULT_EXPIRATION);
+        return createToken(username, DEFAULT_EXPIRATION);
     }
 
     public String generateToken(String username, long expirationMillis) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username, expirationMillis);
+        return createToken(username, expirationMillis);
     }
 
-    private String createToken(Map<String, Object> claims, String subject, long expirationMillis) {
+    private String createToken(String subject, long expirationMillis) {
         return Jwts.builder()
-                .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(Date.from(Instant.now(clock)))
                 .setExpiration(Date.from(Instant.now(clock).plusMillis(expirationMillis)))
