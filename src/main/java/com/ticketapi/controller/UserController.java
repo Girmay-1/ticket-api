@@ -50,7 +50,7 @@ public class UserController {
     public ResponseEntity<?> loginUser(@RequestBody User loginUser) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPasswordHash())
+                    new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword())
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
