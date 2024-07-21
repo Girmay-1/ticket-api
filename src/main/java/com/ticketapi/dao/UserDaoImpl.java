@@ -28,6 +28,14 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User createUser(User user) {
+        logger.debug("Executing SQL: {} with params: {}, {}, {}, {}, {}, {}",
+                UserQueries.CREATE_USER.getQuery(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                true);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
             jdbcTemplate.update(
@@ -38,9 +46,9 @@ public class UserDaoImpl implements UserDao {
                         );
                         ps.setString(1, user.getUsername());
                         ps.setString(2, user.getEmail());
-                        ps.setString(3, user.getPasswordHash());
-                        ps.setObject(4, LocalDateTime.now());
-                        ps.setObject(5, LocalDateTime.now());
+                        ps.setString(3, user.getPassword());  // This is actually returning passwordHash
+                        ps.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                        ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
                         ps.setBoolean(6, true);
                         return ps;
                     },
@@ -53,6 +61,7 @@ public class UserDaoImpl implements UserDao {
             }
         } catch (DataAccessException e) {
             logger.error("Failed to create user: {}", user.getUsername(), e);
+            throw e;  // Re-throw the exception to propagate it
         }
         return user;
     }
