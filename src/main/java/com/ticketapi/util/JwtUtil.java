@@ -1,6 +1,7 @@
-package com.ticketapi.security;
+package com.ticketapi.util;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -10,12 +11,10 @@ import java.security.Key;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
-
 import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private static final long DEFAULT_EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
     private Clock clock = Clock.systemUTC(); // Default to system clock
@@ -24,6 +23,7 @@ public class JwtUtil {
     void setClock(Clock clock) {
         this.clock = clock;
     }
+
     public String generateToken(String username) {
         return createToken(username, DEFAULT_EXPIRATION);
     }
@@ -55,7 +55,11 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        } catch (JwtException e) {
+            throw new IllegalArgumentException("Invalid token", e);
+        }
     }
 
     private Boolean isTokenExpired(String token) {
