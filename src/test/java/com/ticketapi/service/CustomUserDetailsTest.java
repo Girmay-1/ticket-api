@@ -1,58 +1,51 @@
-//package com.ticketapi.service;
-//
-//
-//import com.ticketapi.model.User;
-//import com.ticketapi.service.UserService;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UsernameNotFoundException;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
-//
-//class CustomUserDetailsServiceTest {
-//
-//    @Mock
-//    private UserService userService;
-//
-//    @InjectMocks
-//    private CustomUserDetailsService customUserDetailsService;
-//
-//    @BeforeEach
-//    void setUp() {
-//        MockitoAnnotations.openMocks(this);
-//    }
-//
-//    @Test
-//    void loadUserByUsername_UserExists_ReturnsUserDetails() {
-//        String username = "testuser";
-//        User user = new User();
-//        user.setUsername(username);
-//        user.setPasswordHash("hashedpassword");
-//
-//        when(userService.getUserByUsername(username)).thenReturn(user);
-//
-//        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-//
-//        assertNotNull(userDetails);
-//        assertEquals(username, userDetails.getUsername());
-//        assertEquals("hashedpassword", userDetails.getPassword());
-//        assertTrue(userDetails.getAuthorities().stream()
-//                .anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
-//    }
-//
-//    @Test
-//    void loadUserByUsername_UserNotFound_ThrowsException() {
-//        String username = "nonexistentuser";
-//
-//        when(userService.getUserByUsername(username)).thenReturn(null);
-//
-//        assertThrows(UsernameNotFoundException.class, () -> {
-//            customUserDetailsService.loadUserByUsername(username);
-//        });
-//    }
-//}
+package com.ticketapi.service;
+
+import com.ticketapi.dao.UserDao;
+import com.ticketapi.model.User;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class CustomUserDetailsServiceTest {
+
+    @Mock
+    private UserDao userDao;
+
+    @InjectMocks
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Test
+    void testLoadUserByUsername_UserExists() {
+        String username = "testuser";
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword("password");
+
+        when(userDao.getUserByUsername(username)).thenReturn(user);
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+
+        assertNotNull(userDetails);
+        assertEquals(username, userDetails.getUsername());
+        assertEquals("password", userDetails.getPassword());
+    }
+
+    @Test
+    void testLoadUserByUsername_UserNotFound() {
+        String username = "nonexistentuser";
+
+        when(userDao.getUserByUsername(username)).thenReturn(null);
+
+        assertThrows(UsernameNotFoundException.class, () -> {
+            customUserDetailsService.loadUserByUsername(username);
+        });
+    }
+}
