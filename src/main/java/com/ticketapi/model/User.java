@@ -90,7 +90,15 @@ public class User implements UserDetails {
         this.id = l;
     }
 
-    public Object getId() {
+    public Long getId() {
         return id;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String mail) {
+        this.email = mail;
     }
 }

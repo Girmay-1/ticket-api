@@ -1,141 +1,87 @@
-//package com.ticketapi.service;
-//
-//import com.ticketapi.dao.UserDao;
-//import com.ticketapi.model.User;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//
-//import java.time.LocalDateTime;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.*;
-//
-//class UserServiceTest {
-//
-//    @Mock
-//    private UserDao userDao;
-//
-//    @Mock
-//    private PasswordEncoder passwordEncoder;
-//
-//    @InjectMocks
-//    private UserService userService;
-//
-//    @BeforeEach
-//    void setUp() {
-//        MockitoAnnotations.openMocks(this);
-//    }
-//
-//    @Test
-//    void createUser_Success() {
-//        User user = new User("testuser", "test@example.com", "password");
-//        User createdUser = new User(1L, "testuser", "test@example.com", "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), true);
-//
-//        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-//        when(userDao.createUser(any(User.class))).thenReturn(createdUser);
-//
-//        User result = userService.createUser(user);
-//
-//        assertNotNull(result);
-//        assertEquals(createdUser.getId(), result.getId());
-//        verify(passwordEncoder).encode(eq("password"));
-//        verify(userDao).createUser(any(User.class));
-//    }
-//
-//    @Test
-//    void createUser_Failure() {
-//        User user = new User("testuser", "test@example.com", "password");
-//        User failedUser = new User();
-//
-//        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-//        when(userDao.createUser(any(User.class))).thenReturn(failedUser);
-//
-//        User result = userService.createUser(user);
-//
-//        assertNotNull(result);
-//        assertNull(result.getId());
-//        verify(passwordEncoder).encode(eq("password"));
-//        verify(userDao).createUser(any(User.class));
-//    }
-//
-//    @Test
-//    void getUserById_Success() {
-//        Long userId = 1L;
-//        User expectedUser = new User(userId, "testuser", "test@example.com", "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), true);
-//
-//        when(userDao.getUserById(userId)).thenReturn(expectedUser);
-//
-//        User result = userService.getUserById(userId);
-//
-//        assertNotNull(result);
-//        assertEquals(expectedUser.getId(), result.getId());
-//        assertEquals(expectedUser.getUsername(), result.getUsername());
-//        verify(userDao).getUserById(userId);
-//    }
-//
-//    @Test
-//    void getUserById_Failure() {
-//        Long userId = 1L;
-//        User emptyUser = new User();
-//
-//        when(userDao.getUserById(userId)).thenReturn(emptyUser);
-//
-//        User result = userService.getUserById(userId);
-//
-//        assertNotNull(result);
-//        assertNull(result.getId());
-//        verify(userDao).getUserById(userId);
-//    }
-//
-//    @Test
-//    void getUserByUsername_Success() {
-//        String username = "testuser";
-//        User expectedUser = new User(1L, username, "test@example.com", "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), true);
-//
-//        when(userDao.getUserByUsername(username)).thenReturn(expectedUser);
-//
-//        User result = userService.getUserByUsername(username);
-//
-//        assertNotNull(result);
-//        assertEquals(expectedUser.getId(), result.getId());
-//        assertEquals(expectedUser.getUsername(), result.getUsername());
-//        verify(userDao).getUserByUsername(username);
-//    }
-//
-//    @Test
-//    void getUserByUsername_Failure() {
-//        String username = "testuser";
-//        User emptyUser = new User();
-//
-//        when(userDao.getUserByUsername(username)).thenReturn(emptyUser);
-//
-//        User result = userService.getUserByUsername(username);
-//
-//        assertNotNull(result);
-//        assertNull(result.getId());
-//        verify(userDao).getUserByUsername(username);
-//    }
-//
-//    @Test
-//    void updateUser() {
-//        User user = new User(1L, "testuser", "test@example.com", "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), true);
-//
-//        userService.updateUser(user);
-//
-//        verify(userDao).updateUser(user);
-//    }
-//
-//    @Test
-//    void deleteUser() {
-//        Long userId = 1L;
-//
-//        userService.deleteUser(userId);
-//
-//        verify(userDao).deleteUser(userId);
-//    }
-//}
+package com.ticketapi.service;
+
+import com.ticketapi.dao.UserDao;
+import com.ticketapi.model.User;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    private UserDao userDao;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private UserService userService;
+
+    @Test
+    void testCreateUser() {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("password");
+
+        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+        when(userDao.createUser(any(User.class))).thenReturn(user);
+
+        User createdUser = userService.createUser(user);
+
+        assertNotNull(createdUser);
+        assertEquals("testuser", createdUser.getUsername());
+        verify(passwordEncoder).encode("password");
+        verify(userDao).createUser(user);
+    }
+
+    @Test
+    void testValidateUser_ValidCredentials() {
+        String username = "testuser";
+        String password = "password";
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword("encodedPassword");
+
+        when(userDao.getUserByUsername(username)).thenReturn(user);
+        when(passwordEncoder.matches(password, "encodedPassword")).thenReturn(true);
+
+        boolean result = userService.validateUser(username, password);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testValidateUser_InvalidCredentials() {
+        String username = "testuser";
+        String password = "wrongpassword";
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword("encodedPassword");
+
+        when(userDao.getUserByUsername(username)).thenReturn(user);
+        when(passwordEncoder.matches(password, "encodedPassword")).thenReturn(false);
+
+        boolean result = userService.validateUser(username, password);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testValidateUser_UserNotFound() {
+        String username = "nonexistentuser";
+        String password = "password";
+
+        when(userDao.getUserByUsername(username)).thenReturn(null);
+
+        boolean result = userService.validateUser(username, password);
+
+        assertFalse(result);
+    }
+}
