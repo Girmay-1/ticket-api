@@ -30,6 +30,7 @@ Ticket API is a robust, scalable backend service for managing event ticketing. T
 
 ## API Endpoints
 - `/api/users` - User management
+- `/api/auth` - registering and login
 - `/api/events` - Event CRUD operations
 - `/api/tickets` - Ticket purchasing and management
 - `/api/payments` - Payment processing
