@@ -7,7 +7,7 @@ Ticket API is a robust, scalable backend service for managing event ticketing. T
 - User authentication and authorization using JWT
 - CRUD operations for events and tickets
 - Secure payment processing integration
-- Rate limiting and API throttling
+- Rate limiting
 - Comprehensive API documentation
 - Containerized deployment with Docker
 - CI/CD pipeline integration
