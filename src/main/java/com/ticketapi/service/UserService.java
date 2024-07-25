@@ -24,4 +24,9 @@ public class UserService {
         User user = userDao.getUserByUsername(username);
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
+
+    public Long getUserIdByUsername(String username) {
+        Long userId = userDao.getUserByUsername(username).getId();
+        return userId;
+    }
 }

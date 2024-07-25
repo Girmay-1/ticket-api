@@ -1,7 +1,7 @@
 package com.ticketapi.dao;
 
 import com.ticketapi.model.User;
-import com.ticketapi.util.UserQueries;
+import com.ticketapi.util.DatabaseQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -29,7 +29,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User createUser(User user) {
         logger.debug("Executing SQL: {} with params: {}, {}, {}, {}, {}, {}",
-                UserQueries.CREATE_USER.getQuery(),
+                DatabaseQueries.CREATE_USER.getQuery(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
@@ -41,7 +41,7 @@ public class UserDaoImpl implements UserDao {
             jdbcTemplate.update(
                     connection -> {
                         PreparedStatement ps = connection.prepareStatement(
-                                UserQueries.CREATE_USER.getQuery(),
+                                DatabaseQueries.CREATE_USER.getQuery(),
                                 new String[]{"id"}
                         );
                         ps.setString(1, user.getUsername());
@@ -70,7 +70,7 @@ public class UserDaoImpl implements UserDao {
     public User getUserById(Long id) {
         try {
             return jdbcTemplate.queryForObject(
-                    UserQueries.GET_USER_BY_ID.getQuery(),
+                    DatabaseQueries.GET_USER_BY_ID.getQuery(),
                     new Object[]{id},
                     this::mapRowToUser
             );
@@ -86,7 +86,7 @@ public class UserDaoImpl implements UserDao {
     public User getUserByUsername(String username) {
         try {
             return jdbcTemplate.queryForObject(
-                    UserQueries.GET_USER_BY_USERNAME.getQuery(),
+                    DatabaseQueries.GET_USER_BY_USERNAME.getQuery(),
                     new Object[]{username},
                     this::mapRowToUser
             );
@@ -102,7 +102,7 @@ public class UserDaoImpl implements UserDao {
     public void updateUser(User user) {
         try {
             int rowsAffected = jdbcTemplate.update(
-                    UserQueries.UPDATE_USER.getQuery(),
+                    DatabaseQueries.UPDATE_USER.getQuery(),
                     user.getUsername(),
                     user.getEmail(),
                     Timestamp.valueOf(LocalDateTime.now()),
@@ -119,7 +119,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void deleteUser(Long id) {
         try {
-            int rowsAffected = jdbcTemplate.update(UserQueries.DELETE_USER.getQuery(), id);
+            int rowsAffected = jdbcTemplate.update(DatabaseQueries.DELETE_USER.getQuery(), id);
             if (rowsAffected == 0) {
                 logger.warn("No user deleted with ID: {}", id);
             }
