@@ -25,8 +25,8 @@ Ticket API is a robust, scalable backend service for managing event ticketing. T
 1. Clone the repository
 2. Install Docker and Docker Compose
 3. Run `docker-compose up` to start the application and database
-4. Access the API at `http://localhost:8080`
-5. View API documentation at `http://localhost:8080/swagger-ui.html`
+4. Access the API at `http://localhost:8081`
+5. View API documentation at `http://localhost:8081/swagger-ui.html`
 
 ## API Endpoints
 - `/api/users` - User management
