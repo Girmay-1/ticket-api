@@ -4,6 +4,8 @@ import com.ticketapi.model.User;
 import com.ticketapi.util.JwtUtil;
 import com.ticketapi.service.CustomUserDetailsService;
 import com.ticketapi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Authentication operations")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -38,6 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
             User createdUser = userService.createUser(user);
@@ -49,6 +53,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Authenticate a user and get JWT token")
     public ResponseEntity<?> loginUser(@RequestBody User loginUser) {
         try {
             authenticationManager.authenticate(
