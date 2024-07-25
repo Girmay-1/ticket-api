@@ -3,6 +3,9 @@ package com.ticketapi.controller;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.ticketapi.service.PaymentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
+@Tag(name = "Payments", description = "Payment processing operations")
+@SecurityRequirement(name = "jwt_auth")
 public class PaymentController {
     private final PaymentService paymentService;
     private final static Logger logger = LoggerFactory.getLogger(PaymentController.class);
@@ -23,7 +28,9 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
+
     @PostMapping("/create-payment-intent")
+    @Operation(summary = "Create a payment intent")
     public ResponseEntity<Map<String, String>> createPaymentIntent(@RequestBody Map<String, Object> paymentInfo) {
         try {
             PaymentIntent intent = paymentService.createPaymentIntent(
