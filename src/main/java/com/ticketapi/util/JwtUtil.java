@@ -10,14 +10,19 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final Key key;
     private static final long DEFAULT_EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
     private Clock clock = Clock.systemUTC(); // Default to system clock
+
+    public JwtUtil() {
+        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    }
 
     // Method to set a custom clock (for testing)
     void setClock(Clock clock) {
@@ -69,5 +74,15 @@ public class JwtUtil {
     public Boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
+    }
+
+    public String getEncodedKey() {
+        return Base64.getEncoder().encodeToString(key.getEncoded());
+    }
+
+    // Method to create a Key from an encoded string
+    public static Key decodeKey(String encodedKey) {
+        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+        return Keys.hmacShaKeyFor(decodedKey);
     }
 }
