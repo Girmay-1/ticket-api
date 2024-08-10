@@ -11,13 +11,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 public class AuthControllerIntegrationTest {
@@ -36,16 +36,14 @@ public class AuthControllerIntegrationTest {
         user.setEmail("testuser" + System.currentTimeMillis() + "@example.com");
 
         // Register the user
-        MvcResult registerResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .secure(true)
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
                 .andReturn();
 
         // Login
-        MvcResult loginResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
-                        .secure(true)
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
