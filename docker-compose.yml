@@ -5,8 +5,8 @@ services:
     build: .
     ports:
       - "8081:8081"
-    environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE:-prod}
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE:-prod}
     volumes:
       - ./logs:/logs
 
