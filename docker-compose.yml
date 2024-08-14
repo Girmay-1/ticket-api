@@ -4,26 +4,34 @@ services:
   postgres:
     image: postgres:13
     environment:
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_DB: ticketdb
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ticket-api:
     build: .
     ports:
       - "8081:8081"
     environment:
-      - DB_URL=jdbc:postgresql://postgres:5432/${DB_NAME}
+      - DB_URL=jdbc:postgresql://postgres:5432/ticketdb
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
       - ./logs:/logs
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
