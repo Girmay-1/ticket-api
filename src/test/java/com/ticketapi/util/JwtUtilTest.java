@@ -1,43 +1,55 @@
 package com.ticketapi.util;
 
-import io.jsonwebtoken.Claims;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@TestPropertySource(properties = {
+    "jwt.secret=MyTestSecretKeyThatIsAtLeast256BitsLongForJWTTestingPurposesAndMeetsSecurityRequirements",
+    "jwt.expiration=3600000",
+    "jwt.issuer=test-issuer"
+})
 class JwtUtilTest {
 
-    @InjectMocks
+    @Autowired
     private JwtUtil jwtUtil;
 
     @Test
-    void testGenerateTokenAndExtractUsername() {
+    void testJwtTokenGeneration() {
         String username = "testuser";
-        String token = jwtUtil.generateToken(username);
-        assertEquals(username, jwtUtil.extractUsername(token));
-    }
-
-    @Test
-    void testTokenExpiration() {
-        String username = "testuser";
-        String token = jwtUtil.generateToken(username);
+        List<String> roles = List.of("USER", "ADMIN");
+        
+        String token = jwtUtil.generateToken(username, roles);
+        
+        assertNotNull(token);
+        assertFalse(token.isEmpty());
+        
+        // Verify we can extract the username
+        String extractedUsername = jwtUtil.extractUsername(token);
+        assertEquals(username, extractedUsername);
+        
+        // Verify we can extract roles
+        List<String> extractedRoles = jwtUtil.extractRoles(token);
+        assertEquals(roles, extractedRoles);
+        
+        // Verify token validation
         assertTrue(jwtUtil.validateToken(token, username));
+        assertFalse(jwtUtil.validateToken(token, "wronguser"));
     }
 
     @Test
-    void testExtractClaim() {
+    void testJwtTokenWithDefaultRole() {
         String username = "testuser";
+        
         String token = jwtUtil.generateToken(username);
-        assertEquals(username, jwtUtil.extractClaim(token, Claims::getSubject));
+        
+        List<String> extractedRoles = jwtUtil.extractRoles(token);
+        assertEquals(List.of("USER"), extractedRoles);
     }
 }
