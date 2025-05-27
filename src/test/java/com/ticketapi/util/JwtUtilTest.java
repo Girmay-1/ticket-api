@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-    "jwt.secret=test-secret-key-for-testing-at-least-256-bits-long",
+    "jwt.secret=MyTestSecretKeyThatIsAtLeast256BitsLongForJWTTestingPurposesAndMeetsSecurityRequirements",
     "jwt.expiration=3600000",
     "jwt.issuer=test-issuer"
 })
