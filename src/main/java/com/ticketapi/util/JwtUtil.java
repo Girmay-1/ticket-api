@@ -5,23 +5,37 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private final Key key;
-    private static final long DEFAULT_EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
+    
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+    
+    @Value("${jwt.expiration}")
+    private Long jwtExpiration;
+    
+    @Value("${jwt.issuer}")
+    private String jwtIssuer;
+    
+    private Key key;
     private Clock clock = Clock.systemUTC(); // Default to system clock
 
-    public JwtUtil() {
-        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @PostConstruct
+    public void init() {
+        // Use configured secret instead of random key
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
     // Method to set a custom clock (for testing)
@@ -30,19 +44,25 @@ public class JwtUtil {
     }
 
     public String generateToken(String username) {
-        return createToken(username, DEFAULT_EXPIRATION);
+        return generateToken(username, List.of("USER")); // Default role
     }
 
-    public String generateToken(String username, long expirationMillis) {
-        return createToken(username, expirationMillis);
+    public String generateToken(String username, List<String> roles) {
+        return createToken(username, roles, jwtExpiration);
     }
 
-    private String createToken(String subject, long expirationMillis) {
+    public String generateToken(String username, List<String> roles, long expirationMillis) {
+        return createToken(username, roles, expirationMillis);
+    }
+
+    private String createToken(String subject, List<String> roles, long expirationMillis) {
         return Jwts.builder()
                 .setSubject(subject)
+                .setIssuer(jwtIssuer)
+                .claim("roles", roles)
                 .setIssuedAt(Date.from(Instant.now(clock)))
                 .setExpiration(Date.from(Instant.now(clock).plusMillis(expirationMillis)))
-                .signWith(key)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -54,6 +74,10 @@ public class JwtUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> claims.get("roles", List.class));
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -61,7 +85,11 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (JwtException e) {
             throw new IllegalArgumentException("Invalid token", e);
         }
@@ -80,7 +108,7 @@ public class JwtUtil {
         return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
-    // Method to create a Key from an encoded string
+    // Method to create a Key from an encoded string (for testing)
     public static Key decodeKey(String encodedKey) {
         byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
         return Keys.hmacShaKeyFor(decodedKey);
