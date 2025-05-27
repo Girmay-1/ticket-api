@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class TicketDaoImp implements TiceketDao {
+public class TicketDaoImp implements TicketDao {
 
     private final JdbcTemplate jdbcTemplate;
     private static final Logger logger = LoggerFactory.getLogger(TicketDaoImp.class);
