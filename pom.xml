@@ -8,7 +8,7 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <n>ticket-api</n>
+  <name>ticket-api</name>
   <description>Ticket API for event management</description>
 
   <parent>
