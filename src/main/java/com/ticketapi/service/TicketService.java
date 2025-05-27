@@ -1,5 +1,5 @@
 package com.ticketapi.service;
-import com.ticketapi.dao.TiceketDao;
+import com.ticketapi.dao.TicketDao;
 import com.ticketapi.model.Ticket;
 import org.springframework.stereotype.Service;
 
@@ -7,9 +7,9 @@ import java.util.List;
 
 @Service
 public class TicketService {
-    private final TiceketDao ticketDao;
+    private final TicketDao ticketDao;
 
-    public TicketService(TiceketDao ticketDao) {
+    public TicketService(TicketDao ticketDao) {
         this.ticketDao = ticketDao;
     }
 

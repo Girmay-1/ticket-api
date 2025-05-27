@@ -23,7 +23,7 @@ public enum DatabaseQueries {
             SELECT * FROM events WHERE id = ?"""
     ),
     GET_ALL_EVENTS("""
-            "SELECT * FROM events"""
+            SELECT * FROM events"""
     ),
     UPDATE_EVENT("""
             UPDATE events SET name = ?, description = ?, date_time = ?, venue = ?, total_tickets = ?, available_tickets = ? WHERE id = ?

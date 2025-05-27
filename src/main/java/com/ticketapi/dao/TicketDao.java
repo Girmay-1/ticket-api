@@ -4,7 +4,7 @@ import com.ticketapi.model.Ticket;
 
 import java.util.List;
 
-public interface TiceketDao {
+public interface TicketDao {
     Ticket createTicket(Ticket ticket);
     Ticket getTicketById(Long id);
     List<Ticket> getAllTickets();
