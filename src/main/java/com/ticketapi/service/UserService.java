@@ -26,7 +26,10 @@ public class UserService {
     }
 
     public Long getUserIdByUsername(String username) {
-        Long userId = userDao.getUserByUsername(username).getId();
-        return userId;
+        User user = userDao.getUserByUsername(username);
+        if (user == null) {
+            return null;
+        }
+        return user.getId();
     }
 }

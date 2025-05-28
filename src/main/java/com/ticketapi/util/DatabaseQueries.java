@@ -46,7 +46,9 @@ public enum DatabaseQueries {
     DELETE_TICKET("""
             DELETE FROM tickets WHERE id = ?
             """), GET_TICKET_BY_USERNAME("""
-            SELECT * FROM tickets WHERE user_id = ?""");
+            SELECT t.* FROM tickets t 
+            JOIN users u ON t.user_id = u.id 
+            WHERE u.username = ?""");
 
     private final String query;
 
