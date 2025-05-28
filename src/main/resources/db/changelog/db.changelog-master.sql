@@ -49,8 +49,6 @@ CREATE TABLE orders (
                         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (user_id) REFERENCES users(id),
-                        FOREIGN KEY (event_id) REFERENCES events(id),
-                        INDEX idx_orders_user_id (user_id),
-                        INDEX idx_orders_payment_intent (payment_intent_id)
+                        FOREIGN KEY (event_id) REFERENCES events(id)
 );
 --rollback DROP TABLE orders;
