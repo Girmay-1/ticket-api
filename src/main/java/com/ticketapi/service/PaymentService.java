@@ -30,15 +30,17 @@ public class PaymentService {
     }
     
     public PaymentIntent createPaymentIntent(long amount, String currency) throws StripeException {
-        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty()) {
-            throw new IllegalStateException("Stripe is not configured - STRIPE_SECRET_KEY environment variable is missing");
-        }
-        
+        // Validate input parameters first
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount must be greater than 0");
         }
         if (currency == null || currency.trim().isEmpty()) {
             throw new IllegalArgumentException("Currency must be provided");
+        }
+        
+        // Then check if Stripe is configured
+        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty()) {
+            throw new IllegalStateException("Stripe is not configured - STRIPE_SECRET_KEY environment variable is missing");
         }
         
         logger.debug("Creating payment intent for amount: {} {}", amount, currency);
