@@ -35,3 +35,22 @@ CREATE TABLE tickets (
                          FOREIGN KEY (user_id) REFERENCES users(id)
 );
 --rollback DROP TABLE tickets;
+
+--changeset Girmay:4
+CREATE TABLE orders (
+                        id SERIAL PRIMARY KEY,
+                        user_id INT NOT NULL,
+                        event_id INT NOT NULL,
+                        ticket_type VARCHAR(255) NOT NULL,
+                        price DECIMAL(10, 2) NOT NULL,
+                        quantity INT NOT NULL DEFAULT 1,
+                        status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+                        payment_intent_id VARCHAR(255),
+                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (user_id) REFERENCES users(id),
+                        FOREIGN KEY (event_id) REFERENCES events(id),
+                        INDEX idx_orders_user_id (user_id),
+                        INDEX idx_orders_payment_intent (payment_intent_id)
+);
+--rollback DROP TABLE orders;
