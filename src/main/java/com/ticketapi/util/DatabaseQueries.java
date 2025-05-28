@@ -48,7 +48,31 @@ public enum DatabaseQueries {
             """), GET_TICKET_BY_USERNAME("""
             SELECT t.* FROM tickets t 
             JOIN users u ON t.user_id = u.id 
-            WHERE u.username = ?""");
+            WHERE u.username = ?"""),
+    
+    // Order related queries
+    CREATE_ORDER("""
+        INSERT INTO orders (user_id, event_id, ticket_type, price, quantity, status, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """),
+    GET_ORDER_BY_ID("""
+        SELECT * FROM orders WHERE id = ?
+    """),
+    GET_ORDERS_BY_USER_ID("""
+        SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC
+    """),
+    UPDATE_ORDER_PAYMENT_INTENT("""
+        UPDATE orders SET payment_intent_id = ?, updated_at = ? WHERE id = ?
+    """),
+    UPDATE_ORDER_STATUS("""
+        UPDATE orders SET status = ?, updated_at = ? WHERE id = ?
+    """),
+    GET_ORDER_BY_PAYMENT_INTENT("""
+        SELECT * FROM orders WHERE payment_intent_id = ?
+    """),
+    DELETE_ORDER("""
+        DELETE FROM orders WHERE id = ?
+    """);
 
     private final String query;
 

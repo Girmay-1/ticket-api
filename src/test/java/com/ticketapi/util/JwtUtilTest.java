@@ -1,24 +1,27 @@
 package com.ticketapi.util;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {
-    "jwt.secret=MyTestSecretKeyThatIsAtLeast256BitsLongForJWTTestingPurposesAndMeetsSecurityRequirements",
-    "jwt.expiration=3600000",
-    "jwt.issuer=test-issuer"
-})
 class JwtUtilTest {
 
-    @Autowired
     private JwtUtil jwtUtil;
+    
+    @BeforeEach
+    void setUp() {
+        jwtUtil = new JwtUtil();
+        // Set test properties using reflection to avoid Spring context issues
+        ReflectionTestUtils.setField(jwtUtil, "jwtSecret", "MyTestSecretKeyThatIsAtLeast256BitsLongForJWTTestingPurposesAndMeetsSecurityRequirements");
+        ReflectionTestUtils.setField(jwtUtil, "jwtExpiration", 3600000L);
+        ReflectionTestUtils.setField(jwtUtil, "jwtIssuer", "test-issuer");
+        // Initialize the JWT utility
+        jwtUtil.init();
+    }
 
     @Test
     void testJwtTokenGeneration() {
