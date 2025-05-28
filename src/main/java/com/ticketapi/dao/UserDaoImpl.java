@@ -68,6 +68,11 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserById(Long id) {
+        if (id == null || id <= 0) {
+            logger.warn("Invalid user ID provided: {}", id);
+            return null;
+        }
+        
         try {
             return jdbcTemplate.queryForObject(
                     DatabaseQueries.GET_USER_BY_ID.getQuery(),
@@ -75,31 +80,43 @@ public class UserDaoImpl implements UserDao {
                     this::mapRowToUser
             );
         } catch (EmptyResultDataAccessException e) {
-            logger.error("User not found with ID: {}", id, e);
+            logger.debug("User not found with ID: {}", id);
+            return null;
         } catch (DataAccessException e) {
             logger.error("Error fetching user with ID: {}", id, e);
+            throw new RuntimeException("Failed to fetch user with ID: " + id, e);
         }
-        return new User();
     }
 
     @Override
     public User getUserByUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            logger.warn("Invalid username provided: {}", username);
+            return null;
+        }
+        
         try {
             return jdbcTemplate.queryForObject(
                     DatabaseQueries.GET_USER_BY_USERNAME.getQuery(),
-                    new Object[]{username},
+                    new Object[]{username.trim()},
                     this::mapRowToUser
             );
         } catch (EmptyResultDataAccessException e) {
-            logger.error("User not found with username: {}", username, e);
+            logger.debug("User not found with username: {}", username);
+            return null;
         } catch (DataAccessException e) {
             logger.error("Error fetching user with username: {}", username, e);
+            throw new RuntimeException("Failed to fetch user with username: " + username, e);
         }
-        return new User();
     }
 
     @Override
     public void updateUser(User user) {
+        if (user == null || user.getId() == null || user.getId() <= 0) {
+            logger.warn("Invalid user provided for update: {}", user);
+            throw new IllegalArgumentException("User and user ID must be provided");
+        }
+        
         try {
             int rowsAffected = jdbcTemplate.update(
                     DatabaseQueries.UPDATE_USER.getQuery(),
@@ -113,11 +130,17 @@ public class UserDaoImpl implements UserDao {
             }
         } catch (DataAccessException e) {
             logger.error("Error updating user with ID: {}", user.getId(), e);
+            throw new RuntimeException("Failed to update user with ID: " + user.getId(), e);
         }
     }
 
     @Override
     public void deleteUser(Long id) {
+        if (id == null || id <= 0) {
+            logger.warn("Invalid user ID provided for deletion: {}", id);
+            throw new IllegalArgumentException("Valid user ID must be provided");
+        }
+        
         try {
             int rowsAffected = jdbcTemplate.update(DatabaseQueries.DELETE_USER.getQuery(), id);
             if (rowsAffected == 0) {
@@ -125,6 +148,7 @@ public class UserDaoImpl implements UserDao {
             }
         } catch (DataAccessException e) {
             logger.error("Error deleting user with ID: {}", id, e);
+            throw new RuntimeException("Failed to delete user with ID: " + id, e);
         }
     }
 

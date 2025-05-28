@@ -58,15 +58,24 @@ public class EventDaoImp implements EventDao{
 
     @Override
     public Event getEventById(Long id) {
-        try{
-        return jdbcTemplate
-                .queryForObject(DatabaseQueries.GET_EVENT_BY_ID.getQuery(),new Object[]{id}, this::mapRowToEvent);
-        } catch (EmptyResultDataAccessException e){
-            logger.error("event not found with id: {}", id, e);
-        }catch (DataAccessException e) {
-            logger.error("Exception fetching event with id: {}", id, e);
+        if (id == null || id <= 0) {
+            logger.warn("Invalid event ID provided: {}", id);
+            return null;
         }
-        return new Event();
+        
+        try {
+            return jdbcTemplate.queryForObject(
+                    DatabaseQueries.GET_EVENT_BY_ID.getQuery(), 
+                    new Object[]{id}, 
+                    this::mapRowToEvent
+            );
+        } catch (EmptyResultDataAccessException e) {
+            logger.debug("Event not found with ID: {}", id);
+            return null;
+        } catch (DataAccessException e) {
+            logger.error("Error fetching event with ID: {}", id, e);
+            throw new RuntimeException("Failed to fetch event with ID: " + id, e);
+        }
     }
 
 
@@ -85,23 +94,47 @@ public class EventDaoImp implements EventDao{
 
     @Override
     public void updateEvent(Event event) {
-        try{
-            jdbcTemplate.update(DatabaseQueries.UPDATE_EVENT.getQuery(),event.getName(), event.getDescription(), Timestamp.valueOf(event.getDateTime()),
-                    event.getVenue(), event.getTotalTickets(), event.getAvailableTickets(), event.getId());
-        } catch (DataAccessException e) {
-            logger.error("Exception updating event with name: {}", event.getName(), e);
+        if (event == null || event.getId() == null || event.getId() <= 0) {
+            logger.warn("Invalid event provided for update: {}", event);
+            throw new IllegalArgumentException("Event and event ID must be provided");
         }
-
+        
+        try {
+            int rowsAffected = jdbcTemplate.update(
+                    DatabaseQueries.UPDATE_EVENT.getQuery(),
+                    event.getName(), 
+                    event.getDescription(), 
+                    Timestamp.valueOf(event.getDateTime()),
+                    event.getVenue(), 
+                    event.getTotalTickets(), 
+                    event.getAvailableTickets(), 
+                    event.getId()
+            );
+            if (rowsAffected == 0) {
+                logger.warn("No event updated with ID: {}", event.getId());
+            }
+        } catch (DataAccessException e) {
+            logger.error("Error updating event with ID: {}", event.getId(), e);
+            throw new RuntimeException("Failed to update event with ID: " + event.getId(), e);
+        }
     }
 
     @Override
     public void deleteEvent(Long id) {
-        try{
-            jdbcTemplate.update(DatabaseQueries.DELETE_EVENT.getQuery(), id);
-        } catch (DataAccessException e) {
-            logger.error("Error deleting event with id: {}", id, e);
+        if (id == null || id <= 0) {
+            logger.warn("Invalid event ID provided for deletion: {}", id);
+            throw new IllegalArgumentException("Valid event ID must be provided");
         }
-
+        
+        try {
+            int rowsAffected = jdbcTemplate.update(DatabaseQueries.DELETE_EVENT.getQuery(), id);
+            if (rowsAffected == 0) {
+                logger.warn("No event deleted with ID: {}", id);
+            }
+        } catch (DataAccessException e) {
+            logger.error("Error deleting event with ID: {}", id, e);
+            throw new RuntimeException("Failed to delete event with ID: " + id, e);
+        }
     }
     private Event mapRowToEvent(ResultSet rs, int rowNum) throws SQLException {
         Event event = new Event();

@@ -51,14 +51,20 @@ public class TicketDaoImp implements TicketDao {
 
     @Override
     public Ticket getTicketById(Long id) {
+        if (id == null || id <= 0) {
+            logger.warn("Invalid ticket ID provided: {}", id);
+            return null;
+        }
+        
         try {
             return jdbcTemplate.queryForObject(DatabaseQueries.GET_TICKET_BY_ID.getQuery(), new Object[]{id}, this::mapRowToTicket);
         } catch (EmptyResultDataAccessException e) {
-            logger.error("Ticket not found with id: {}", id, e);
+            logger.debug("Ticket not found with ID: {}", id);
+            return null;
         } catch (DataAccessException e) {
-            logger.error("Exception fetching ticket with id: {}", id, e);
+            logger.error("Error fetching ticket with ID: {}", id, e);
+            throw new RuntimeException("Failed to fetch ticket with ID: " + id, e);
         }
-        return null;
     }
 
     @Override
@@ -73,33 +79,56 @@ public class TicketDaoImp implements TicketDao {
 
     @Override
     public Void updateTicket(Ticket ticket) {
+        if (ticket == null || ticket.getId() == null || ticket.getId() <= 0) {
+            logger.warn("Invalid ticket provided for update: {}", ticket);
+            throw new IllegalArgumentException("Ticket and ticket ID must be provided");
+        }
+        
         try {
-            jdbcTemplate.update(DatabaseQueries.UPDATE_TICKET.getQuery(),
+            int rowsAffected = jdbcTemplate.update(DatabaseQueries.UPDATE_TICKET.getQuery(),
                     ticket.getEventId(), ticket.getUserId(), ticket.getTicketType(), ticket.getPrice(), ticket.getId());
+            if (rowsAffected == 0) {
+                logger.warn("No ticket updated with ID: {}", ticket.getId());
+            }
         } catch (DataAccessException e) {
-            logger.error("Exception updating ticket with id: {}", ticket.getId(), e);
+            logger.error("Error updating ticket with ID: {}", ticket.getId(), e);
+            throw new RuntimeException("Failed to update ticket with ID: " + ticket.getId(), e);
         }
         return null;
     }
 
     @Override
     public Void deleteTicket(Long id) {
+        if (id == null || id <= 0) {
+            logger.warn("Invalid ticket ID provided for deletion: {}", id);
+            throw new IllegalArgumentException("Valid ticket ID must be provided");
+        }
+        
         try {
-            jdbcTemplate.update(DatabaseQueries.DELETE_TICKET.getQuery(), id);
+            int rowsAffected = jdbcTemplate.update(DatabaseQueries.DELETE_TICKET.getQuery(), id);
+            if (rowsAffected == 0) {
+                logger.warn("No ticket deleted with ID: {}", id);
+            }
         } catch (DataAccessException e) {
-            logger.error("Error deleting ticket with id: {}", id, e);
+            logger.error("Error deleting ticket with ID: {}", id, e);
+            throw new RuntimeException("Failed to delete ticket with ID: " + id, e);
         }
         return null;
     }
 
     @Override
     public List<Ticket> getTicketByUserName(String username) {
-        try{
-            return jdbcTemplate.query(DatabaseQueries.GET_TICKET_BY_USERNAME.getQuery(), new Object[]{username}, this::mapRowToTicket);
-        } catch (Exception e) {
-            logger.error("exception when trying to get tickets for user: {}", username, e);
+        if (username == null || username.trim().isEmpty()) {
+            logger.warn("Invalid username provided: {}", username);
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
+        
+        try {
+            return jdbcTemplate.query(DatabaseQueries.GET_TICKET_BY_USERNAME.getQuery(), new Object[]{username.trim()}, this::mapRowToTicket);
+        } catch (DataAccessException e) {
+            logger.error("Error fetching tickets for user: {}", username, e);
+            throw new RuntimeException("Failed to fetch tickets for user: " + username, e);
+        }
     }
 
     private Ticket mapRowToTicket(ResultSet rs, int rowNum) throws SQLException {
