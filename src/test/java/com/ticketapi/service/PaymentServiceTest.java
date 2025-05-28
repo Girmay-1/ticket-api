@@ -20,11 +20,10 @@ class PaymentServiceTest {
     private PaymentService paymentService;
 
     @Test
-    void testCreatePaymentIntent_ValidInput() {
-        // Note: This test will fail if STRIPE_SECRET_KEY is not set properly
-        assertThrows(StripeException.class, () -> {
-            PaymentIntent intent = paymentService.createPaymentIntent(2000L, "USD");
-            // In a real test environment with valid Stripe keys, this would succeed
+    void testCreatePaymentIntent_StripeNotConfigured() {
+        // Test when STRIPE_SECRET_KEY is not set (common in CI/test environments)
+        assertThrows(IllegalStateException.class, () -> {
+            paymentService.createPaymentIntent(2000L, "USD");
         });
     }
     

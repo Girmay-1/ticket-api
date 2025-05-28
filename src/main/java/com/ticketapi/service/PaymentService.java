@@ -22,14 +22,18 @@ public class PaymentService {
     @PostConstruct
     public void init() {
         if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty()) {
-            logger.error("STRIPE_SECRET_KEY environment variable is not set");
-            throw new IllegalStateException("Stripe configuration is missing");
+            logger.warn("STRIPE_SECRET_KEY environment variable is not set - Stripe functionality will be disabled");
+            return;
         }
         Stripe.apiKey = stripeSecretKey;
         logger.info("Stripe API initialized successfully");
     }
     
     public PaymentIntent createPaymentIntent(long amount, String currency) throws StripeException {
+        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty()) {
+            throw new IllegalStateException("Stripe is not configured - STRIPE_SECRET_KEY environment variable is missing");
+        }
+        
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount must be greater than 0");
         }
