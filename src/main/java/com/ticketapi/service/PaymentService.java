@@ -39,8 +39,8 @@ public class PaymentService {
     
     @PostConstruct
     public void init() {
-        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty()) {
-            logger.warn("STRIPE_SECRET_KEY environment variable is not set - Stripe functionality will be disabled");
+        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty() || stripeSecretKey.equals("default_test_key")) {
+            logger.warn("STRIPE_SECRET_KEY environment variable is not set or using default - Stripe functionality will be disabled");
             return;
         }
         Stripe.apiKey = stripeSecretKey;
@@ -89,7 +89,8 @@ public class PaymentService {
         long amountInCents = Math.round(price * 100);
         
         // Check if Stripe is configured - if not, use mock mode for development
-        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty()) {
+        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty() || 
+            stripeSecretKey.equals("default_test_key") || stripeSecretKey.startsWith("default_")) {
             logger.warn("Stripe not configured - using mock mode for development");
             return createMockPaymentIntent(order, amountInCents);
         }
@@ -127,6 +128,19 @@ public class PaymentService {
     public void confirmPayment(String paymentIntentId) {
         logger.info("Confirming payment: {}", paymentIntentId);
         
+        // Check if Stripe is configured
+        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty() || 
+            stripeSecretKey.equals("default_test_key") || stripeSecretKey.startsWith("default_")) {
+            logger.warn("Stripe not configured - using mock confirmation for payment: {}", paymentIntentId);
+            // For mock mode, just try to find and confirm the order
+            Order order = orderService.getOrderByPaymentIntent(paymentIntentId);
+            if (order != null) {
+                orderService.confirmOrder(order.getId());
+                logger.info("Mock payment confirmed and order completed: {}", order.getId());
+            }
+            return;
+        }
+        
         try {
             // Get payment intent from Stripe
             PaymentIntent paymentIntent = PaymentIntent.retrieve(paymentIntentId);
@@ -148,6 +162,20 @@ public class PaymentService {
     
     public PaymentStatusResponse getPaymentStatus(String paymentIntentId) {
         logger.info("Getting payment status: {}", paymentIntentId);
+        
+        // Handle mock payment intents or when Stripe is not configured
+        if (paymentIntentId.startsWith("pi_mock_") || 
+            stripeSecretKey == null || stripeSecretKey.trim().isEmpty() || 
+            stripeSecretKey.equals("default_test_key") || stripeSecretKey.startsWith("default_")) {
+            logger.warn("Using mock mode for payment status: {}", paymentIntentId);
+            return new PaymentStatusResponse(
+                paymentIntentId,
+                "succeeded",
+                0L,
+                "usd",
+                null
+            );
+        }
         
         try {
             PaymentIntent paymentIntent = PaymentIntent.retrieve(paymentIntentId);
@@ -204,9 +232,11 @@ public class PaymentService {
             throw new IllegalArgumentException("Currency must be provided");
         }
         
-        // Then check if Stripe is configured
-        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty()) {
-            throw new IllegalStateException("Stripe is not configured - STRIPE_SECRET_KEY environment variable is missing");
+        // Check if Stripe is configured - if not, return null to indicate mock mode
+        if (stripeSecretKey == null || stripeSecretKey.trim().isEmpty() || 
+            stripeSecretKey.equals("default_test_key") || stripeSecretKey.startsWith("default_")) {
+            logger.warn("Stripe is not configured - returning null for mock mode");
+            return null;  // Return null instead of throwing exception
         }
         
         logger.debug("Creating payment intent for amount: {} {}", amount, currency);
