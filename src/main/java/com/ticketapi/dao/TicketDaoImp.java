@@ -95,7 +95,7 @@ public class TicketDaoImp implements TicketDao {
     @Override
     public List<Ticket> getTicketByUserName(String username) {
         try{
-            return jdbcTemplate.query(DatabaseQueries.GET_TICKET_BY_USERNAME.getQuery(), this::mapRowToTicket);
+            return jdbcTemplate.query(DatabaseQueries.GET_TICKET_BY_USERNAME.getQuery(), new Object[]{username}, this::mapRowToTicket);
         } catch (Exception e) {
             logger.error("exception when trying to get tickets for user: {}", username, e);
         }
