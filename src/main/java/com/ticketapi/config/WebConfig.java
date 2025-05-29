@@ -12,6 +12,7 @@ import java.time.Duration;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         Bucket bucket = Bucket.builder()
