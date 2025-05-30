@@ -29,7 +29,7 @@ public class Event {
     }
 
     public Event() {
-
+        this.price = BigDecimal.ZERO; // Default to 0.00 if not specified
     }
 
     public Long getId() {

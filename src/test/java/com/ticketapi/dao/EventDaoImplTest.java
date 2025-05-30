@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,6 +33,7 @@ class EventDaoImplTest {
         testEvent.setVenue("Test Venue");
         testEvent.setTotalTickets(100);
         testEvent.setAvailableTickets(100);
+        testEvent.setPrice(BigDecimal.valueOf(25.00));
     }
 
     @Test
@@ -45,6 +47,7 @@ class EventDaoImplTest {
         assertEquals("Test Venue", createdEvent.getVenue());
         assertEquals(100, createdEvent.getTotalTickets());
         assertEquals(100, createdEvent.getAvailableTickets());
+        assertEquals(0, BigDecimal.valueOf(25.00).compareTo(createdEvent.getPrice()));
     }
     
     @Test
@@ -84,6 +87,7 @@ class EventDaoImplTest {
         secondEvent.setVenue("Second Venue");
         secondEvent.setTotalTickets(50);
         secondEvent.setAvailableTickets(50);
+        secondEvent.setPrice(BigDecimal.valueOf(0.00)); // Free event
         eventDao.createEvent(secondEvent);
         
         List<Event> events = eventDao.getAllEvents();
@@ -101,6 +105,7 @@ class EventDaoImplTest {
         createdEvent.setVenue("Updated Venue");
         createdEvent.setTotalTickets(200);
         createdEvent.setAvailableTickets(150);
+        createdEvent.setPrice(BigDecimal.valueOf(35.00));
         
         assertDoesNotThrow(() -> eventDao.updateEvent(createdEvent));
         
@@ -110,6 +115,7 @@ class EventDaoImplTest {
         assertEquals("Updated Venue", updatedEvent.getVenue());
         assertEquals(200, updatedEvent.getTotalTickets());
         assertEquals(150, updatedEvent.getAvailableTickets());
+        assertEquals(0, BigDecimal.valueOf(35.00).compareTo(updatedEvent.getPrice()));
     }
     
     @Test

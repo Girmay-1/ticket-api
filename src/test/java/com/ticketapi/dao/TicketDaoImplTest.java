@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,6 +51,7 @@ class TicketDaoImplTest {
         testEvent.setVenue("Test Venue");
         testEvent.setTotalTickets(100);
         testEvent.setAvailableTickets(100);
+        testEvent.setPrice(BigDecimal.valueOf(50.00)); // Add price field
         testEvent = eventDao.createEvent(testEvent);
         
         // Create test ticket

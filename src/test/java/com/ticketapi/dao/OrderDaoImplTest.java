@@ -50,6 +50,7 @@ class OrderDaoImplTest {
         testEvent.setVenue("Test Venue");
         testEvent.setTotalTickets(100);
         testEvent.setAvailableTickets(100);
+        testEvent.setPrice(BigDecimal.valueOf(50.00)); // Add price field
         Event savedEvent = eventDao.createEvent(testEvent);
         testEventId = savedEvent.getId();
     }
