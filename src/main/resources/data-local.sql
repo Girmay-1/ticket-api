@@ -1,6 +1,12 @@
 -- Schema for H2 Local Testing
 -- This file will be automatically loaded by Spring Boot when using H2
 
+-- Drop existing tables if they exist to ensure clean schema
+DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -18,7 +24,8 @@ CREATE TABLE IF NOT EXISTS events (
     date_time TIMESTAMP NOT NULL,
     venue VARCHAR(255) NOT NULL,
     total_tickets INT NOT NULL,
-    available_tickets INT NOT NULL
+    available_tickets INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL DEFAULT 0.00
 );
 
 CREATE TABLE IF NOT EXISTS tickets (
@@ -47,8 +54,9 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 -- Insert some sample data for testing
-INSERT INTO events (name, description, date_time, venue, total_tickets, available_tickets) 
+INSERT INTO events (name, description, date_time, venue, total_tickets, available_tickets, price) 
 VALUES 
-    ('Spring Concert', 'A wonderful spring concert', '2025-06-15 19:00:00', 'Central Park', 500, 450),
-    ('Tech Conference', 'Latest in technology trends', '2025-07-20 09:00:00', 'Convention Center', 1000, 800),
-    ('Art Exhibition', 'Modern art showcase', '2025-08-10 10:00:00', 'Art Gallery', 200, 150);
+    ('Spring Concert', 'A wonderful spring concert', '2025-06-15 19:00:00', 'Central Park', 500, 450, 0.00),
+    ('Tech Conference', 'Latest in technology trends', '2025-07-20 09:00:00', 'Convention Center', 1000, 800, 0.00),
+    ('Art Exhibition', 'Modern art showcase', '2025-08-10 10:00:00', 'Art Gallery', 200, 150, 0.00),
+    ('Premium Jazz Night', 'Intimate jazz performance with world-class musicians', '2025-09-05 20:00:00', 'Blue Note Cafe', 100, 95, 0.50);

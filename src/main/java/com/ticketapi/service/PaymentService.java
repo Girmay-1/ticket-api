@@ -58,8 +58,8 @@ public class PaymentService {
             throw new IllegalArgumentException("Valid event ID is required");
         }
         
-        if (price == null || price <= 0) {
-            throw new IllegalArgumentException("Valid price is required");
+        if (price == null || price < 0) {
+            throw new IllegalArgumentException("Valid price is required (can be 0 for free events)");
         }
         
         if (ticketType == null || ticketType.trim().isEmpty()) {

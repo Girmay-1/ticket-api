@@ -43,6 +43,7 @@ public class EventDaoImp implements EventDao{
                         ps.setString(4, event.getVenue());
                         ps.setInt(5, event.getTotalTickets());
                         ps.setInt(6, event.getAvailableTickets());
+                        ps.setBigDecimal(7, event.getPrice());
                         return ps;
                     }, keyHolder
             );
@@ -107,7 +108,8 @@ public class EventDaoImp implements EventDao{
                     Timestamp.valueOf(event.getDateTime()),
                     event.getVenue(), 
                     event.getTotalTickets(), 
-                    event.getAvailableTickets(), 
+                    event.getAvailableTickets(),
+                    event.getPrice(),
                     event.getId()
             );
             if (rowsAffected == 0) {
@@ -145,6 +147,7 @@ public class EventDaoImp implements EventDao{
         event.setVenue(rs.getString("venue"));
         event.setTotalTickets(rs.getInt("total_tickets"));
         event.setAvailableTickets(rs.getInt("available_tickets"));
+        event.setPrice(rs.getBigDecimal("price"));
         return event;
     }
 }

@@ -17,7 +17,7 @@ public enum DatabaseQueries {
         DELETE FROM users WHERE id = ?
     """),
     CREATE_EVENT("""
-            INSERT INTO events (name, description, date_time, venue, total_tickets, available_tickets) VALUES (?, ?, ?, ?, ?, ?)"""
+            INSERT INTO events (name, description, date_time, venue, total_tickets, available_tickets, price) VALUES (?, ?, ?, ?, ?, ?, ?)"""
     ),
     GET_EVENT_BY_ID("""
             SELECT * FROM events WHERE id = ?"""
@@ -26,7 +26,7 @@ public enum DatabaseQueries {
             SELECT * FROM events"""
     ),
     UPDATE_EVENT("""
-            UPDATE events SET name = ?, description = ?, date_time = ?, venue = ?, total_tickets = ?, available_tickets = ? WHERE id = ?
+            UPDATE events SET name = ?, description = ?, date_time = ?, venue = ?, total_tickets = ?, available_tickets = ?, price = ? WHERE id = ?
             """),
     DELETE_EVENT("""
            DELETE FROM events WHERE id = ?
