@@ -42,8 +42,8 @@ public class OrderService {
         if (ticketType == null || ticketType.trim().isEmpty()) {
             throw new IllegalArgumentException("Ticket type is required");
         }
-        if (price == null || price <= 0) {
-            throw new IllegalArgumentException("Valid price is required");
+        if (price == null || price < 0) {
+            throw new IllegalArgumentException("Valid price is required (can be 0 for free events)");
         }
 
         // Check if event exists and has available tickets

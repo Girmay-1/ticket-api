@@ -1,5 +1,6 @@
 package com.ticketapi.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Event {
@@ -10,8 +11,9 @@ public class Event {
     private String venue;
     private int totalTickets;
     private int availableTickets;
+    private BigDecimal price;
 
-    public Event(Long id, String name, String description, LocalDateTime dateTime, String venue, int totalTickets, int availableTickets) {
+    public Event(Long id, String name, String description, LocalDateTime dateTime, String venue, int totalTickets, int availableTickets, BigDecimal price) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -19,7 +21,9 @@ public class Event {
         this.venue = venue;
         this.totalTickets = totalTickets;
         this.availableTickets = availableTickets;
+        this.price = price;
     }
+    
     public Event(LocalDateTime dateTime){
         this.dateTime = dateTime;
     }
@@ -75,11 +79,20 @@ public class Event {
     public void setAvailableTickets(int availableTickets) {
         this.availableTickets = availableTickets;
     }
+    
     public LocalDateTime getDateTime() {
         return dateTime;
     }
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+    
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 }

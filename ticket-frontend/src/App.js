@@ -3,7 +3,9 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Container, Typography, Box, Button, Stack } from '@mui/material';
 import Login from './components/Login';
+import Register from './components/Register';
 import EventsList from './components/EventsList';
+import EventDetails from './components/EventDetails';
 
 const theme = createTheme({
   palette: {
@@ -76,18 +78,20 @@ function App() {
       case 'login':
         return <Login onLogin={handleLogin} onNavigate={handleNavigate} />;
       case 'register':
-        return (
-          <Container maxWidth="sm" sx={{ mt: 4 }}>
-            <Typography variant="h4" gutterBottom>Register</Typography>
-            <Typography>Register component coming next...</Typography>
-            <Button sx={{ mt: 2 }} onClick={() => setCurrentView('home')}>Back to Home</Button>
-          </Container>
-        );
+        return <Register onNavigate={handleNavigate} />;
       case 'events':
         return (
           <EventsList 
             onNavigate={handleNavigate} 
             onSelectEvent={handleSelectEvent}
+          />
+        );
+      case 'event-details':
+        return (
+          <EventDetails 
+            event={selectedEvent} 
+            onNavigate={handleNavigate} 
+            user={user}
           />
         );
       default:
