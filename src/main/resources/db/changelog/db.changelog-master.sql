@@ -52,3 +52,7 @@ CREATE TABLE orders (
                         FOREIGN KEY (event_id) REFERENCES events(id)
 );
 --rollback DROP TABLE orders;
+
+--changeset Girmay:5
+ALTER TABLE events ADD COLUMN price DECIMAL(10, 2) NOT NULL DEFAULT 0.00;
+--rollback ALTER TABLE events DROP COLUMN price;

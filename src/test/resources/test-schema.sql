@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS events (
     date_time TIMESTAMP NOT NULL,
     venue VARCHAR(255) NOT NULL,
     total_tickets INT NOT NULL,
-    available_tickets INT NOT NULL
+    available_tickets INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL DEFAULT 0.00
 );
 
 CREATE TABLE IF NOT EXISTS tickets (
