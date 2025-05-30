@@ -47,7 +47,7 @@ class EventDaoImplTest {
         assertEquals("Test Venue", createdEvent.getVenue());
         assertEquals(100, createdEvent.getTotalTickets());
         assertEquals(100, createdEvent.getAvailableTickets());
-        assertEquals(BigDecimal.valueOf(25.00), createdEvent.getPrice());
+        assertEquals(0, BigDecimal.valueOf(25.00).compareTo(createdEvent.getPrice()));
     }
     
     @Test
@@ -115,7 +115,7 @@ class EventDaoImplTest {
         assertEquals("Updated Venue", updatedEvent.getVenue());
         assertEquals(200, updatedEvent.getTotalTickets());
         assertEquals(150, updatedEvent.getAvailableTickets());
-        assertEquals(BigDecimal.valueOf(35.00), updatedEvent.getPrice());
+        assertEquals(0, BigDecimal.valueOf(35.00).compareTo(updatedEvent.getPrice()));
     }
     
     @Test

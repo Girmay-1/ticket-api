@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 
 import java.sql.ResultSet;
@@ -43,7 +44,7 @@ public class EventDaoImp implements EventDao{
                         ps.setString(4, event.getVenue());
                         ps.setInt(5, event.getTotalTickets());
                         ps.setInt(6, event.getAvailableTickets());
-                        ps.setBigDecimal(7, event.getPrice());
+                        ps.setBigDecimal(7, event.getPrice() != null ? event.getPrice() : BigDecimal.ZERO);
                         return ps;
                     }, keyHolder
             );
@@ -109,7 +110,7 @@ public class EventDaoImp implements EventDao{
                     event.getVenue(), 
                     event.getTotalTickets(), 
                     event.getAvailableTickets(),
-                    event.getPrice(),
+                    event.getPrice() != null ? event.getPrice() : BigDecimal.ZERO,
                     event.getId()
             );
             if (rowsAffected == 0) {
@@ -147,7 +148,7 @@ public class EventDaoImp implements EventDao{
         event.setVenue(rs.getString("venue"));
         event.setTotalTickets(rs.getInt("total_tickets"));
         event.setAvailableTickets(rs.getInt("available_tickets"));
-        event.setPrice(rs.getBigDecimal("price"));
+        event.setPrice(rs.getBigDecimal("price") != null ? rs.getBigDecimal("price") : BigDecimal.ZERO);
         return event;
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,6 +71,7 @@ class PaymentControllerIntegrationTest {
         testEvent.setVenue("Test Venue");
         testEvent.setTotalTickets(100);
         testEvent.setAvailableTickets(100);
+        testEvent.setPrice(BigDecimal.valueOf(50.00)); // Add price field
         Event savedEvent = eventDao.createEvent(testEvent);
         testEventId = savedEvent.getId();
         
