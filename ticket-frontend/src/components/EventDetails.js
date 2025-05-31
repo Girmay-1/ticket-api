@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -25,7 +26,13 @@ import StripePaymentForm from './StripePaymentForm';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8081/api';
 
-const EventDetails = ({ event, onNavigate, user }) => {
+const EventDetails = ({ event, user }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get event from props, location state, or params
+  const currentEvent = event || location.state?.selectedEvent;
+  
   const [ticketQuantity, setTicketQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,7 +42,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
   const [paymentIntentData, setPaymentIntentData] = useState(null);
 
   // Handle case where no event is selected
-  if (!event) {
+  if (!currentEvent) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
@@ -47,7 +54,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
           </Typography>
           <Button 
             variant="contained" 
-            onClick={() => onNavigate('events')}
+            onClick={() => navigate('/events')}
           >
             Browse Events
           </Button>
@@ -74,7 +81,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
 
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
-    if (value >= 1 && value <= Math.min(10, event.availableTickets)) {
+    if (value >= 1 && value <= Math.min(10, currentEvent.availableTickets)) {
       setTicketQuantity(value);
     }
   };
@@ -82,7 +89,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
   const handlePurchase = async () => {
     if (!user) {
       setError('Please login to purchase tickets');
-      setTimeout(() => onNavigate('login'), 2000);
+      setTimeout(() => navigate('/login'), 2000);
       return;
     }
 
@@ -110,9 +117,9 @@ const EventDetails = ({ event, onNavigate, user }) => {
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            eventId: event.id,
+            eventId: currentEvent.id,
             ticketType: 'general',
-            price: event.price || 0.0, // Use dynamic pricing from event
+            price: currentEvent.price || 0.0, // Use dynamic pricing from event
             quantity: ticketQuantity
           })
         });
@@ -148,7 +155,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
             setSuccess(`Successfully reserved ${ticketQuantity} ticket(s)!`);
             setOrderDetails({
               orderId: paymentData.orderId,
-              eventName: event.name,
+              eventName: currentEvent.name,
               quantity: ticketQuantity,
               totalPrice: 0,
               confirmationCode: `CONF-${paymentData.paymentIntentId.slice(-8).toUpperCase()}`,
@@ -156,7 +163,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
             });
             
             // Update available tickets locally
-            event.availableTickets -= ticketQuantity;
+            currentEvent.availableTickets -= ticketQuantity;
             return; // Success - exit the function
           } else {
             const errorText = await confirmResponse.text();
@@ -182,7 +189,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
         setSuccess(`Successfully reserved ${ticketQuantity} ticket(s)! (MVP Mode)`);
         setOrderDetails({
           orderId: mockOrderId,
-          eventName: event.name,
+          eventName: currentEvent.name,
           quantity: ticketQuantity,
           totalPrice: 0,
           confirmationCode: mockConfirmationCode,
@@ -190,7 +197,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
         });
         
         // Update available tickets locally
-        event.availableTickets -= ticketQuantity;
+        currentEvent.availableTickets -= ticketQuantity;
       }
       
     } catch (err) {
@@ -200,7 +207,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
       // If authentication error, redirect to login after delay
       if (err.message.includes('login again') || err.message.includes('Session expired')) {
         setTimeout(() => {
-          onNavigate('login');
+          navigate('/login');
         }, 3000);
       }
     } finally {
@@ -224,14 +231,14 @@ const EventDetails = ({ event, onNavigate, user }) => {
         setSuccess(`Successfully purchased ${ticketQuantity} ticket(s)!`);
         setOrderDetails({
           orderId: paymentIntentData.orderId,
-          eventName: event.name,
+          eventName: currentEvent.name,
           quantity: ticketQuantity,
           totalPrice: paymentIntent.amount / 100,
           confirmationCode: `CONF-${paymentIntent.id.slice(-8).toUpperCase()}`,
           paymentIntentId: paymentIntent.id
         });
         setShowPaymentForm(false);
-        event.availableTickets -= ticketQuantity;
+        currentEvent.availableTickets -= ticketQuantity;
       } else {
         setError('Payment confirmed but failed to finalize order. Please contact support.');
       }
@@ -327,14 +334,14 @@ const EventDetails = ({ event, onNavigate, user }) => {
           <Box textAlign="center">
             <Button 
               variant="contained" 
-              onClick={() => onNavigate('events')}
+              onClick={() => navigate('/events')}
               sx={{ mr: 2 }}
             >
               Browse More Events
             </Button>
             <Button 
               variant="outlined" 
-              onClick={() => onNavigate('home')}
+              onClick={() => navigate('/')}
             >
               Go Home
             </Button>
@@ -349,7 +356,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
       <Button 
         variant="outlined" 
         startIcon={<ArrowBack />}
-        onClick={() => onNavigate('events')}
+        onClick={() => navigate('/events')}
         sx={{ mb: 3 }}
       >
         Back to Events
@@ -360,13 +367,13 @@ const EventDetails = ({ event, onNavigate, user }) => {
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 4 }}>
             <Typography variant="h3" component="h1" gutterBottom>
-              {event.name}
+              {currentEvent.name}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
-              {event.availableTickets > 0 ? (
+              {currentEvent.availableTickets > 0 ? (
                 <Chip 
-                  label={`${event.availableTickets} tickets available`} 
+                  label={`${currentEvent.availableTickets} tickets available`} 
                   color="success" 
                 />
               ) : (
@@ -375,8 +382,8 @@ const EventDetails = ({ event, onNavigate, user }) => {
                   color="error" 
                 />
               )}
-              {(event.price && event.price > 0) ? (
-                <Chip label={`${event.price}`} color="primary" variant="outlined" />
+              {(currentEvent.price && currentEvent.price > 0) ? (
+                <Chip label={`${currentEvent.price}`} color="primary" variant="outlined" />
               ) : (
                 <Chip label="Free Event" color="primary" variant="outlined" />
               )}
@@ -386,7 +393,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
               Event Details
             </Typography>
             <Typography variant="body1" paragraph>
-              {event.description || 'Join us for an amazing event experience!'}
+              {currentEvent.description || 'Join us for an amazing event experience!'}
             </Typography>
 
             <Box sx={{ mt: 3 }}>
@@ -397,7 +404,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
                     Date & Time
                   </Typography>
                   <Typography variant="body1">
-                    {formatDate(event.dateTime)}
+                    {formatDate(currentEvent.dateTime)}
                   </Typography>
                 </Box>
               </Box>
@@ -409,7 +416,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
                     Venue
                   </Typography>
                   <Typography variant="body1">
-                    {event.venue || 'Venue TBD'}
+                    {currentEvent.venue || 'Venue TBD'}
                   </Typography>
                 </Box>
               </Box>
@@ -421,7 +428,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
                     Capacity
                   </Typography>
                   <Typography variant="body1">
-                    {event.totalTickets} total seats
+                    {currentEvent.totalTickets} total seats
                   </Typography>
                 </Box>
               </Box>
@@ -442,7 +449,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
               </Alert>
             )}
 
-            {event.availableTickets > 0 ? (
+            {currentEvent.availableTickets > 0 ? (
               <>
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -454,11 +461,11 @@ const EventDetails = ({ event, onNavigate, user }) => {
                     onChange={handleQuantityChange}
                     inputProps={{ 
                       min: 1, 
-                      max: Math.min(10, event.availableTickets) 
+                      max: Math.min(10, currentEvent.availableTickets) 
                     }}
                     fullWidth
                     size="small"
-                    helperText={`Max ${Math.min(10, event.availableTickets)} tickets per order`}
+                    helperText={`Max ${Math.min(10, currentEvent.availableTickets)} tickets per order`}
                   />
                 </Box>
 
@@ -468,10 +475,10 @@ const EventDetails = ({ event, onNavigate, user }) => {
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                     <Typography>
-                      {ticketQuantity} × {(event.price && event.price > 0) ? `${event.price} Ticket` : 'Free Ticket'}
+                      {ticketQuantity} × {(currentEvent.price && currentEvent.price > 0) ? `${currentEvent.price} Ticket` : 'Free Ticket'}
                     </Typography>
                     <Typography fontWeight="bold">
-                      {(event.price && event.price > 0) ? `${(event.price * ticketQuantity).toFixed(2)}` : 'FREE'}
+                      {(currentEvent.price && currentEvent.price > 0) ? `${(currentEvent.price * ticketQuantity).toFixed(2)}` : 'FREE'}
                     </Typography>
                   </Box>
                   <Divider sx={{ my: 1 }} />
@@ -479,8 +486,8 @@ const EventDetails = ({ event, onNavigate, user }) => {
                     <Typography variant="h6">
                       Total
                     </Typography>
-                    <Typography variant="h6" color={(event.price && event.price > 0) ? "primary.main" : "success.main"}>
-                      {(event.price && event.price > 0) ? `${(event.price * ticketQuantity).toFixed(2)}` : 'FREE'}
+                    <Typography variant="h6" color={(currentEvent.price && currentEvent.price > 0) ? "primary.main" : "success.main"}>
+                      {(currentEvent.price && currentEvent.price > 0) ? `${(currentEvent.price * ticketQuantity).toFixed(2)}` : 'FREE'}
                     </Typography>
                   </Box>
                 </Box>
@@ -496,8 +503,8 @@ const EventDetails = ({ event, onNavigate, user }) => {
                   {loading ? (
                     <CircularProgress size={24} />
                   ) : (
-                    (event.price && event.price > 0) 
-                      ? `Buy ${ticketQuantity} Ticket${ticketQuantity > 1 ? 's' : ''} - ${(event.price * ticketQuantity).toFixed(2)}`
+                    (currentEvent.price && currentEvent.price > 0) 
+                      ? `Buy ${ticketQuantity} Ticket${ticketQuantity > 1 ? 's' : ''} - ${(currentEvent.price * ticketQuantity).toFixed(2)}`
                       : `Get ${ticketQuantity} Ticket${ticketQuantity > 1 ? 's' : ''}`
                   )}
                 </Button>
@@ -507,7 +514,7 @@ const EventDetails = ({ event, onNavigate, user }) => {
                     Please{' '}
                     <Button 
                       color="primary" 
-                      onClick={() => onNavigate('login')}
+                      onClick={() => navigate('/login')}
                       sx={{ textTransform: 'none', p: 0, minWidth: 'auto' }}
                     >
                       login

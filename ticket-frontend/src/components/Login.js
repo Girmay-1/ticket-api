@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -12,7 +13,8 @@ import {
 
 const API_BASE_URL = 'http://localhost:8081/api';
 
-const Login = ({ onLogin, onNavigate }) => {
+const Login = ({ onLogin }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -57,10 +59,10 @@ const Login = ({ onLogin, onNavigate }) => {
           onLogin(data);
         }
         
-        // Navigate to events or home
-        setTimeout(() => {
-          onNavigate('events');
-        }, 1000);
+        // Navigate to events page - this is handled in App.js onLogin callback
+        // setTimeout(() => {
+        //   navigate('/events');
+        // }, 1000);
         
       } else {
         setError(data.message || 'Login failed. Please check your credentials.');
@@ -138,7 +140,7 @@ const Login = ({ onLogin, onNavigate }) => {
             Don't have an account?{' '}
             <Button 
               color="primary" 
-              onClick={() => onNavigate('register')}
+              onClick={() => navigate('/register')}
               sx={{ textTransform: 'none' }}
             >
               Register here
@@ -149,7 +151,7 @@ const Login = ({ onLogin, onNavigate }) => {
         <Box textAlign="center" mt={2}>
           <Button 
             variant="outlined" 
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             size="small"
           >
             ← Back to Home

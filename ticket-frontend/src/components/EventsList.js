@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -16,7 +17,8 @@ import { CalendarToday, LocationOn } from '@mui/icons-material';
 
 const API_BASE_URL = 'http://localhost:8081/api';
 
-const EventsList = ({ onNavigate, onSelectEvent }) => {
+const EventsList = ({ onSelectEvent }) => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -71,9 +73,11 @@ const EventsList = ({ onNavigate, onSelectEvent }) => {
     }
   };
 
-  const formatPrice = (price) => {
-    if (price === undefined || price === null) return 'Free';
-    return `${Number(price).toFixed(2)}`;
+  const handleEventClick = (event) => {
+    // Call the parent callback to update selected event
+    if (onSelectEvent) onSelectEvent(event);
+    // Navigate to event details
+    navigate(`/events/${event.id}`, { state: { selectedEvent: event } });
   };
 
   if (loading) {
@@ -95,7 +99,7 @@ const EventsList = ({ onNavigate, onSelectEvent }) => {
         </Typography>
         <Button 
           variant="outlined" 
-          onClick={() => onNavigate('home')}
+          onClick={() => navigate('/')}
         >
           ← Back to Home
         </Button>
@@ -206,10 +210,7 @@ const EventsList = ({ onNavigate, onSelectEvent }) => {
                 <Button 
                   size="small" 
                   variant="outlined"
-                  onClick={() => {
-                    if (onSelectEvent) onSelectEvent(event);
-                    onNavigate('event-details');
-                  }}
+                  onClick={() => handleEventClick(event)}
                 >
                   View Details
                 </Button>
@@ -217,10 +218,7 @@ const EventsList = ({ onNavigate, onSelectEvent }) => {
                   size="small" 
                   variant="contained"
                   disabled={!event.availableTickets || event.availableTickets <= 0}
-                  onClick={() => {
-                    if (onSelectEvent) onSelectEvent(event);
-                    onNavigate('event-details');
-                  }}
+                  onClick={() => handleEventClick(event)}
                 >
                   {event.availableTickets > 0 ? 'Buy Tickets' : 'Sold Out'}
                 </Button>
