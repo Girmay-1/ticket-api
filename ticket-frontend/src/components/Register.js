@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -12,7 +13,8 @@ import {
 
 const API_BASE_URL = 'http://localhost:8081/api';
 
-const Register = ({ onNavigate }) => {
+const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -94,7 +96,7 @@ const Register = ({ onNavigate }) => {
         
         // Navigate to login after 2 seconds
         setTimeout(() => {
-          onNavigate('login');
+          navigate('/login');
         }, 2000);
         
       } else {
@@ -201,7 +203,7 @@ const Register = ({ onNavigate }) => {
             Already have an account?{' '}
             <Button 
               color="primary" 
-              onClick={() => onNavigate('login')}
+              onClick={() => navigate('/login')}
               sx={{ textTransform: 'none' }}
             >
               Sign in here
@@ -212,7 +214,7 @@ const Register = ({ onNavigate }) => {
         <Box textAlign="center" mt={2}>
           <Button 
             variant="outlined" 
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             size="small"
           >
             ← Back to Home
